@@ -1,4 +1,5 @@
-name: Terraform Plan and Apply
+name: Terraform Plan Apply or Destroy
+run-name: Terraform Plan and {{ github.event.inputs.apply == 'true' && 'Apply' || 'Destroy' }}
 
 on:
     workflow_dispatch:
