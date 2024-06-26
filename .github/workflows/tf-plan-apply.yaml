@@ -43,7 +43,7 @@ jobs:
               id: parse
               env:
                 AZJSON: ${{ secrets.AZJSON }}
-             run: |
+              run: |
                 ARM_CLIENT_ID=$(echo $AZJSON | jq -r '.["clientId"]')
                 ARM_CLIENT_SECRET=$(echo $AZJSON | jq -r '.["clientSecret"]')
                 ARM_TENANT_ID=$(echo $AZJSON | jq -r '.["tenantId"]')
