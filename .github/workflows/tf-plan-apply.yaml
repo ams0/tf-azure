@@ -28,6 +28,11 @@ on:
                 required: true
                 default: false
                 type: boolean
+            destroy:
+                description: 'Destroy the Terraform resources'
+                required: true
+                default: false
+                type: boolean
         
 jobs:
     terraform:
@@ -102,3 +107,9 @@ jobs:
             -var="location=${{ github.event.inputs.location }}" \
             -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}" \
             -var="rg_name=${{ github.event.inputs.rg_name }}"
+
+        - name: Terraform Destroy
+          if: ${{ github.event.inputs.destroy }}
+          working-directory: ${{ github.event.inputs.directory }}
+          run: |
+            terraform destroy -auto-approve 
