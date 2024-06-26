@@ -38,3 +38,17 @@ jobs:
               uses: azure/login@v2
               with:
                 creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+            - name: JSON Parse
+              id: parse
+              env:
+                AZJSON: ${{ secrets.AZJSON }}
+             run: |
+                ARM_CLIENT_ID=$(echo $AZJSON | jq -r '.["clientId"]')
+                ARM_CLIENT_SECRET=$(echo $AZJSON | jq -r '.["clientSecret"]')
+                ARM_TENANT_ID=$(echo $AZJSON | jq -r '.["tenantId"]')
+                ARM_SUBSCRIPTION_ID=$(echo $AZJSON | jq -r '.["subscriptionId"]')
+                echo ARM_CLIENT_ID=$ARM_CLIENT_ID >> $GITHUB_ENV
+                echo ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET >> $GITHUB_ENV
+                echo ARM_TENANT_ID=$ARM_TENANT_ID >> $GITHUB_ENV
+                echo ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID >> $GITHUB_ENV                
