@@ -15,6 +15,10 @@ on:
         description: 'Number of IPs to allocate'
         required: true
         default: '1'
+      subscription_id:
+        description: 'Azure Subscription ID'
+        required: true
+        default: '1c51d1c3-d83d-4d71-ace1-df3496eddac4'
       apply:
         description: 'Apply the Terraform plan'
         required: true
@@ -27,7 +31,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
@@ -37,18 +41,18 @@ jobs:
       - name: Parse Azure Credentials
         id: azure_credentials
         run: |
-          echo "::set-output name=client_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)"
-          echo "::set-output name=client_secret::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)"
-          echo "::set-output name=subscription_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)"
-          echo "::set-output name=tenant_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)"
+          echo "client_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .appId))" >> $GITHUB_ENV
+          echo "client_secret=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r ."password"))" >> $GITHUB_ENV
+          echo "tenant_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenant))" >> $GITHUB_ENV
+          echo "subscription_id=${{ github.event.inputs.subscription_id }}" >> $GITHUB_ENV
       
       - name: Initialize Terraform
         working-directory: ./terraform/tf-multiip-azure
         env:
-          ARM_CLIENT_ID: ${{ steps.azure_credentials.outputs.client_id }}
-          ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
-          ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
-          ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
+          ARM_CLIENT_ID: ${{ env.client_id }}
+          ARM_CLIENT_SECRET: ${{ env.client_secret }}
+          ARM_SUBSCRIPTION_ID: ${{ env.subscription_id }}
+          ARM_TENANT_ID: ${{ env.tenant_id }}
         run: terraform init
       
       - name: Terraform Plan
