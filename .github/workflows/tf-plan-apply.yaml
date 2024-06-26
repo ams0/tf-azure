@@ -7,6 +7,10 @@ on:
         description: 'Azure location (e.g., eastus, westus)'
         required: true
         default: 'eastus'
+      rg_name:
+        description: 'Resource Group name'
+        required: true
+        default: 'tf-multiip-rg'
       number_of_ips:
         description: 'Number of IPs to allocate'
         required: true
@@ -65,4 +69,8 @@ jobs:
           ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
           ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
           ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
-        run: terraform apply -auto-approve -var="location=${{ github.event.inputs.location }}" -var="number_of_ips=${{ github.event.inputs.number_of_ips }}"
+        run: |
+            terraform apply -auto-approve \
+            -var="location=${{ github.event.inputs.location }}" \
+            -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}" \
+            -var="rg_name=${{ github.event.inputs.rg_name }}"

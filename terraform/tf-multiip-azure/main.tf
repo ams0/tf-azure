@@ -8,6 +8,13 @@ variable "location" {
   
 }
 
+variable "rg_name" {
+  description = "The Azure Resource group bane."
+  type        = string
+  default     = "pubips-resources"
+  
+}
+
 variable "num_ip_configs" {
   description = "The number of IP configurations to create."
   type        = number
@@ -23,7 +30,7 @@ variable "subnet_prefixes" {
 }
 
 resource "azurerm_resource_group" "pubips" {
-  name     = "pubips-resources"
+  name     = var.rg_name
   location = var.location
 }
 
