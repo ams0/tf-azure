@@ -1,5 +1,4 @@
 name: Terraform Plan Apply or Destroy
-run-name: Terraform Plan and {{ github.event.inputs.apply == 'true' && 'Apply' || 'Destroy' }}
 
 on:
     workflow_dispatch:
@@ -34,7 +33,9 @@ on:
                 required: true
                 default: false
                 type: boolean
-        
+
+run-name: Terraform Plan and {{ github.event.inputs.apply == 'true' && 'Apply' || 'Destroy' }}
+                
 jobs:
     terraform:
         runs-on: ubuntu-latest
