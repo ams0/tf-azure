@@ -11,7 +11,7 @@ on:
         description: 'Resource Group name'
         required: true
         default: 'tf-multiip-rg'
-      number_of_ips:
+      num_ip_configs:
         description: 'Number of IPs to allocate'
         required: true
         default: '1'
