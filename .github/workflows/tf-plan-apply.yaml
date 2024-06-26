@@ -63,3 +63,21 @@ jobs:
           id: init
           run: |
             terraform init
+            - name: Terraform Format
+            id: fmt
+            run: terraform fmt -check -recursive
+            continue-on-error: true
+    
+    # The step runs Terraform validate.
+        - name: Terraform Validate
+          id: validate
+          run: terraform validate -no-color
+    
+    # Here we generate our Terraform plan. The full output will be used in a later step.
+    # Also make note of the example environmental variable. This is the syntax used to pass secrets to Terraform. 
+        - name: Terraform Plan
+          id: tplan
+          env: 
+            TF_VAR_secret: '${{ secrets.example_secret }}'
+          run: |
+            terraform plan -no-color
