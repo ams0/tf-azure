@@ -3,6 +3,10 @@ name: Terraform Plan and Apply
 on:
     workflow_dispatch:
         inputs:
+            directory:
+                description: 'Specify the directory containing the Terraform configuration'
+                required: true
+                default: './terraform/tf-multiip-azure'
             location:
                 description: 'Azure location (e.g., eastus, westus)'
                 required: true
@@ -42,7 +46,7 @@ jobs:
         - name: JSON Parse
           id: parse
           env:
-            AZJSON: ${{ secrets.AZJSON }}
+            AZJSON: ${{ secrets.AZURE_CREDENTIALS }}
           run: |
             ARM_CLIENT_ID=$(echo $AZJSON | jq -r '.["clientId"]')
             ARM_CLIENT_SECRET=$(echo $AZJSON | jq -r '.["clientSecret"]')
@@ -60,6 +64,7 @@ jobs:
     
     # Here terraform init is run directly on the runner's shell. 
         - name: Terraform Init
+          working-directory: ${{ github.event.inputs.directory }}
           id: init
           run: |
             terraform init
@@ -70,6 +75,7 @@ jobs:
     
     # The step runs Terraform validate.
         - name: Terraform Validate
+          working-directory: ${{ github.event.inputs.directory }}
           id: validate
           run: terraform validate -no-color
     
@@ -80,4 +86,13 @@ jobs:
           env: 
             TF_VAR_secret: '${{ secrets.example_secret }}'
           run: |
-            terraform plan -no-color
+            terraform plan -no-color -var="location=${{ github.event.inputs.location }}" -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}"
+
+        - name: Terraform Apply
+          if: ${{ github.event.inputs.apply }}
+          working-directory: ${{ github.event.inputs.directory }}
+          run: |
+            terraform apply -auto-approve \
+            -var="location=${{ github.event.inputs.location }}" \
+            -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}" \
+            -var="rg_name=${{ github.event.inputs.rg_name }}"
