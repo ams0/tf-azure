@@ -41,9 +41,9 @@ jobs:
       - name: Parse Azure Credentials
         id: azure_credentials
         run: |
-          echo "client_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .appId))" >> $GITHUB_ENV
-          echo "client_secret=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r ."password"))" >> $GITHUB_ENV
-          echo "tenant_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenant))" >> $GITHUB_ENV
+          echo "client_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .appId)" >> $GITHUB_ENV
+          echo "client_secret=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r ."password")" >> $GITHUB_ENV
+          echo "tenant_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenant)" >> $GITHUB_ENV
           echo "subscription_id=${{ github.event.inputs.subscription_id }}" >> $GITHUB_ENV
       
       - name: Initialize Terraform
