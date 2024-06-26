@@ -68,8 +68,9 @@ jobs:
           id: init
           run: |
             terraform init
-            
+
         - name: Terraform Format
+          working-directory: ${{ github.event.inputs.directory }}
           id: fmt
           run: terraform fmt -check -recursive
           continue-on-error: true
@@ -83,9 +84,8 @@ jobs:
     # Here we generate our Terraform plan. The full output will be used in a later step.
     # Also make note of the example environmental variable. This is the syntax used to pass secrets to Terraform. 
         - name: Terraform Plan
+          working-directory: ${{ github.event.inputs.directory }}
           id: tplan
-          env: 
-            TF_VAR_secret: '${{ secrets.example_secret }}'
           run: |
             terraform plan -no-color -var="location=${{ github.event.inputs.location }}" -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}"
 
