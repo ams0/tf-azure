@@ -1,0 +1,68 @@
+name: Terraform Plan and Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      location:
+        description: 'Azure location (e.g., eastus, westus)'
+        required: true
+        default: 'eastus'
+      number_of_ips:
+        description: 'Number of IPs to allocate'
+        required: true
+        default: '1'
+      apply:
+        description: 'Apply the Terraform plan'
+        required: true
+        default: 'false'
+        type: boolean
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.11
+
+      - name: Parse Azure Credentials
+        id: azure_credentials
+        run: |
+          echo "::set-output name=client_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)"
+          echo "::set-output name=client_secret::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)"
+          echo "::set-output name=subscription_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)"
+          echo "::set-output name=tenant_id::$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)"
+      
+      - name: Initialize Terraform
+        working-directory: ./terraform/tf-multiip-azure
+        env:
+          ARM_CLIENT_ID: ${{ steps.azure_credentials.outputs.client_id }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
+          ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
+        run: terraform init
+      
+      - name: Terraform Plan
+        id: plan
+        working-directory: ./terraform/tf-multiip-azure
+        env:
+          ARM_CLIENT_ID: ${{ steps.azure_credentials.outputs.client_id }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
+          ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
+        run: terraform plan -var="location=${{ github.event.inputs.location }}" -var="number_of_ips=${{ github.event.inputs.number_of_ips }}"
+      
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.apply }}
+        working-directory: ./terraform/tf-multiip-azure
+        env:
+          ARM_CLIENT_ID: ${{ steps.azure_credentials.outputs.client_id }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
+          ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
+        run: terraform apply -auto-approve -var="location=${{ github.event.inputs.location }}" -var="number_of_ips=${{ github.event.inputs.number_of_ips }}"
