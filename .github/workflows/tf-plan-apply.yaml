@@ -1,80 +1,40 @@
 name: Terraform Plan and Apply
 
 on:
-  workflow_dispatch:
-    inputs:
-      location:
-        description: 'Azure location (e.g., eastus, westus)'
-        required: true
-        default: 'eastus'
-      rg_name:
-        description: 'Resource Group name'
-        required: true
-        default: 'tf-multiip-rg'
-      num_ip_configs:
-        description: 'Number of IPs to allocate'
-        required: true
-        default: '1'
-      subscription_id:
-        description: 'Azure Subscription ID'
-        required: true
-        default: '1c51d1c3-d83d-4d71-ace1-df3496eddac4'
-      apply:
-        description: 'Apply the Terraform plan'
-        required: true
-        default: 'false'
-        type: boolean
-
+    workflow_dispatch:
+        inputs:
+            location:
+                description: 'Azure location (e.g., eastus, westus)'
+                required: true
+                default: 'eastus'
+            rg_name:
+                description: 'Resource Group name'
+                required: true
+                default: 'tf-multiip-rg'
+            num_ip_configs:
+                description: 'Number of IPs to allocate'
+                required: true
+                default: '1'
+            subscription_id:
+                description: 'Azure Subscription ID'
+                required: true
+                default: '1c51d1c3-d83d-4d71-ace1-df3496eddac4'
+            apply:
+                description: 'Apply the Terraform plan'
+                required: true
+                default: false
+                type: boolean
+        
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.0.11
+    terraform:
+        runs-on: ubuntu-latest
 
-      - name: Parse Azure Credentials
-        id: azure_credentials
-        run: |
-          echo "client_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .appId)" >> $GITHUB_ENV
-          echo "client_secret=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r ."password")" >> $GITHUB_ENV
-          echo "tenant_id=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenant)" >> $GITHUB_ENV
-          echo "subscription_id=${{ github.event.inputs.subscription_id }}" >> $GITHUB_ENV
-      
-      - name: Initialize Terraform
-        working-directory: ./terraform/tf-multiip-azure
-        env:
-          ARM_CLIENT_ID: ${{ env.client_id }}
-          ARM_CLIENT_SECRET: ${{ env.client_secret }}
-          ARM_SUBSCRIPTION_ID: ${{ env.subscription_id }}
-          ARM_TENANT_ID: ${{ env.tenant_id }}
-        run: terraform init
-      
-      - name: Terraform Plan
-        id: plan
-        working-directory: ./terraform/tf-multiip-azure
-        env:
-          ARM_CLIENT_ID: ${{ steps.azure_credentials.outputs.client_id }}
-          ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
-          ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
-          ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
-        run: terraform plan -var="location=${{ github.event.inputs.location }}" -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}"
-      
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.apply }}
-        working-directory: ./terraform/tf-multiip-azure
-        env:
-          ARM_CLIENT_ID: ${{ steps.azure_credentials.outputs.client_id }}
-          ARM_CLIENT_SECRET: ${{ steps.azure_credentials.outputs.client_secret }}
-          ARM_SUBSCRIPTION_ID: ${{ steps.azure_credentials.outputs.subscription_id }}
-          ARM_TENANT_ID: ${{ steps.azure_credentials.outputs.tenant_id }}
-        run: |
-            terraform apply -auto-approve \
-            -var="location=${{ github.event.inputs.location }}" \
-            -var="num_ip_configs=${{ github.event.inputs.num_ip_configs }}" \
-            -var="rg_name=${{ github.event.inputs.rg_name }}"
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Azure Authentication
+              id: login
+              uses: azure/login@v2
+              with:
+                creds: ${{ secrets.AZURE_CREDENTIALS }}
