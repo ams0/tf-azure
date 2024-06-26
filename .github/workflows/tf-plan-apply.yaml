@@ -47,15 +47,20 @@ jobs:
           id: parse
           env:
             AZJSON: ${{ secrets.AZURE_CREDENTIALS }}
+            S3JSON: ${{ secrets.S3_CREDENTIALS }}
           run: |
             ARM_CLIENT_ID=$(echo $AZJSON | jq -r '.["clientId"]')
             ARM_CLIENT_SECRET=$(echo $AZJSON | jq -r '.["clientSecret"]')
             ARM_TENANT_ID=$(echo $AZJSON | jq -r '.["tenantId"]')
             ARM_SUBSCRIPTION_ID=$(echo $AZJSON | jq -r '.["subscriptionId"]')
+            AWS_ACCESS_KEY_ID=$(echo $S3JSON | jq -r '.["accessKey"]')
+            AWS_SECRET_ACCESS_KEY=$(echo $S3JSON | jq -r '.["secretKey"]')
             echo ARM_CLIENT_ID=$ARM_CLIENT_ID >> $GITHUB_ENV
             echo ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET >> $GITHUB_ENV
             echo ARM_TENANT_ID=$ARM_TENANT_ID >> $GITHUB_ENV
-            echo ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID >> $GITHUB_ENV                
+            echo ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID >> $GITHUB_ENV
+            echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> $GITHUB_ENV
+            echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> $GITHUB_ENV               
 
         - name: Install Terraform
           uses: hashicorp/setup-terraform@v3.1.1
