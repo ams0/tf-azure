@@ -3,11 +3,10 @@ terraform {
     bucket = "tfstate"
     key    = "tf-azure/terraform.tfstate"
 
-    endpoints = { s3 = "https://s3.us-east-va.io.cloud.ovh.us" }
-    # export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-    # export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY 
+    endpoints = { s3 = "https://s3.cloud.kubespaces.io" }
 
-    region                      = "us-east-va"
+
+    region                      = "cloud"
     skip_credentials_validation = true
     skip_metadata_api_check     = true
     skip_region_validation      = true
