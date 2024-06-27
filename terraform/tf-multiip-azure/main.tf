@@ -5,14 +5,14 @@ variable "location" {
   description = "The Azure Region in which all resources will be created."
   type        = string
   default     = "East US"
-  
+
 }
 
 variable "rg_name" {
   description = "The Azure Resource group bane."
   type        = string
   default     = "pubips-resources"
-  
+
 }
 
 variable "num_ip_configs" {
@@ -55,13 +55,13 @@ resource "azurerm_subnet" "subnet" {
 }
 
 resource "azurerm_public_ip" "public_ips" {
-  
-    count               = var.num_ip_configs
-    name                = "pubip-${count.index + 1}"
-    location            = azurerm_resource_group.pubips.location
-    resource_group_name = azurerm_resource_group.pubips.name
-    allocation_method   = "Dynamic"
-    sku                 = "Basic"
+
+  count               = var.num_ip_configs
+  name                = "pubip-${count.index + 1}"
+  location            = azurerm_resource_group.pubips.location
+  resource_group_name = azurerm_resource_group.pubips.name
+  allocation_method   = "Dynamic"
+  sku                 = "Basic"
 
 }
 
@@ -84,12 +84,12 @@ resource "azurerm_network_interface" "vnet-nic" {
 }
 
 resource "azurerm_linux_virtual_machine" "proxy-vm" {
-  name                = "proxy-vm"
-  resource_group_name = azurerm_resource_group.pubips.name
-  location            = azurerm_resource_group.pubips.location
-  size                = "Standard_DS1_v2"
-  admin_username      = "ubuntu"
-  network_interface_ids = [azurerm_network_interface.vnet-nic.id]
+  name                            = "proxy-vm"
+  resource_group_name             = azurerm_resource_group.pubips.name
+  location                        = azurerm_resource_group.pubips.location
+  size                            = "Standard_DS1_v2"
+  admin_username                  = "ubuntu"
+  network_interface_ids           = [azurerm_network_interface.vnet-nic.id]
   disable_password_authentication = true
 
   admin_ssh_key {
